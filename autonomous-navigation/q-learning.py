@@ -313,6 +313,43 @@ def subscriber():
     rospy.Subscriber("/ardrone/navdata", Navdata, cb_drone_navdata)
 
 
+num_episodes = 10000
+
+tf.reset_default_graph()
+
+subscriber()
+
+while not rospy.is_shutdown():
+    
+    for _ in xrange(num_episodes):
+        state = env.reset()
+        env.done = False
+        total_reward = 0
+        rospy.sleep(0.25)
+        while env.done == False:
+            state = env.build_state(state)
+            env.createQ(state)
+            # print "Q Table :", env.Q
+            action = env.choose_action(state)
+            env.epsilon = env.epsilon_min + (env.epsilon_max - env.epsilon_min)*(math.exp(-0.01*_))
+                    
+            #take an e-greedy action
+            next_state, reward, done = env.step(int(action))
+            
+            total_reward += reward
+
+            next_state_temp = env.build_state(next_state)
+            env.createQ(next_state_temp)
+            
+            env.learn(state, action, reward, next_state_temp)
+
+            state = next_state
+
+        print "reward in episode ",_," is: ",total_reward
+        
+
+
+
 
 
 
