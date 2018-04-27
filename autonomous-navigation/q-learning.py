@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 import random
 import copy
 import math
@@ -91,7 +90,6 @@ class DroneState(object):
 
     def learn(self, state, action, reward, next_state):
         maxQ_next_state = env.get_maxQ(next_state)
-        # self.Q[state][action] = self.Q[state][action] + self.alpha*(reward - self.Q[state][action])
         self.Q[state][action] = (1 - self.alpha)*self.Q[state][action] + self.alpha*(self.gamma*(reward + maxQ_next_state))
 
         return
@@ -108,12 +106,6 @@ class DroneState(object):
             reset_simulation()
         except(rospy.ServiceException) as e:
             print "reset_world failed!"
-
-        # rospy.wait_for_service('/gazebo/pause_physics')
-        # try:
-        #     pause()
-        # except (rospy.ServiceException) as e:
-        #     print "rospause failed!"
 
         print "called reset()"
         return env.get_drone_state()
@@ -291,7 +283,7 @@ def get_reward(state):
         reward = 100
     else:
         reward = -1
-    # if (state[0] < -0.05 or state[0] > 5.05 or state[1] < -0.05 or state[1] > 5.05):
+    
     return reward
 
 def takeoff():
@@ -314,8 +306,6 @@ def subscriber():
 
 
 num_episodes = 10000
-
-tf.reset_default_graph()
 
 subscriber()
 
